@@ -239,5 +239,3 @@ sequenceDiagram
 * Mantieni **webhook** idempotenti e con **verifica firma**.
 * Conserva nel tuo DB lo **stato derivato** (entitlements/licenze), non duplicare i dati fiscali di Stripe.
 * In **Test mode**, documenta bene la differenza tra *customer* e *user* nella tua app; usa un mapping stabile (es. claim `sub` del JWT ⇄ `internal_customer_ref` su Stripe).
-
-Se vuoi, posso generarti i **file separati** (uno per diagramma) o comporre un **README** completo con i frammenti Mermaid già divisi e pronti per il rendering.
