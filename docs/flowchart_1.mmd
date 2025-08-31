@@ -1,0 +1,39 @@
+sequenceDiagram
+    autonumber
+    participant U as User/App
+    participant UA as User Auth API
+    participant P as Payments API
+    participant D as Database API
+    participant F as File Storage API
+    participant S as Stripe
+    participant M as MongoDB / SQL
+    participant G as GCS / AWS
+    participant C as Cognito / Keycloak
+
+    %% --- Autenticazione ---
+    U->>UA: Login con Username & Password / OIDC
+    UA->>C: Autenticazione con Client ID & Secret
+    C-->>UA: Validazione OK + Claims utente
+    UA-->>U: JWT
+
+    %% --- Richieste API con JWT ---
+    U->>P: Richiesta con JWT
+    P->>UA: Verifica JWT
+    UA-->>P: JWT valido
+    P->>S: Operazione (Checkout, Abbonamento...)<br/>con Client ID & Secret
+    S-->>P: Esito operazione (es. URL Checkout)
+    P-->>U: Risposta finale (es. URL Checkout)
+
+    U->>D: Richiesta con JWT
+    D->>UA: Verifica JWT
+    UA-->>D: JWT valido
+    D->>M: Query/Write DB con Client ID & Secret
+    M-->>D: Risultato query
+    D-->>U: Risposta dati (es. profilo, configurazione piani)
+
+    U->>F: Richiesta con JWT
+    F->>UA: Verifica JWT
+    UA-->>F: JWT valido
+    F->>G: Upload/Download file con Client ID & Secret
+    G-->>F: Risultato operazione (file URL, conferma)
+    F-->>U: Risposta file (es. link o dati scaricati)

@@ -1,0 +1,31 @@
+sequenceDiagram
+    autonumber
+    participant A as Admin Team
+    participant P as Payments API
+    participant D as Database API
+    participant F as File Storage API
+    participant U as User Auth API
+    participant S as Stripe
+    participant M as MongoDB / SQL
+    participant G as GCS / AWS
+    participant C as Cognito / Keycloak
+
+    A->>P: Chiamate con API Key
+    P->>S: Autenticazione con Client ID & Secret
+    S-->>P: Esito
+    P-->>A: Risposta
+
+    A->>D: Chiamate con API Key
+    D->>M: Autenticazione con Client ID & Secret
+    M-->>D: Esito
+    D-->>A: Risposta
+
+    A->>F: Chiamate con API Key
+    F->>G: Autenticazione con Client ID & Secret
+    G-->>F: Esito
+    F-->>A: Risposta
+
+    A->>U: Chiamate con API Key
+    U->>C: Autenticazione con Client ID & Secret
+    C-->>U: Esito
+    U-->>A: Risposta

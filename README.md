@@ -137,3 +137,89 @@ Le API intermedie sono sviluppate in **Python (FastAPI o simili)** e comunicano 
 * **Multi-tenant ready**: ogni chiamata è tracciata per utente via `sub` del JWT.
 * **Manutenibilità**: l’Admin ha doppio accesso (dashboard + API intermedie).
 * **Flessibilità**: sostituzione di provider (es. Cognito ↔ Keycloak) senza cambiare logica app.
+
+
+---
+
+
+## 7. Diagrammi di flusso (Sequence)
+
+### 7.1 Flusso autenticazione e utilizzo API (user)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant U as User/App
+    participant UA as User Auth API
+    participant P as Payments API
+    participant D as Database API
+    participant F as File Storage API
+    participant S as Stripe
+    participant M as MongoDB / SQL
+    participant G as GCS / AWS
+    participant C as Cognito / Keycloak
+
+    %% --- Autenticazione ---
+    U->>UA: Login con Username & Password / OIDC
+    UA->>C: Autenticazione con Client ID & Secret
+    C-->>UA: Validazione OK + Claims utente
+    UA-->>U: JWT
+
+    %% --- Richieste API con JWT ---
+    U->>P: Richiesta con JWT
+    P->>UA: Verifica JWT
+    UA-->>P: JWT valido
+    P->>S: Operazione (Checkout, Abbonamento...)<br/>con Client ID & Secret
+    S-->>P: Esito operazione (es. URL Checkout)
+    P-->>U: Risposta finale (es. URL Checkout)
+
+    U->>D: Richiesta con JWT
+    D->>UA: Verifica JWT
+    UA-->>D: JWT valido
+    D->>M: Query/Write DB con Client ID & Secret
+    M-->>D: Risultato query
+    D-->>U: Risposta dati (es. profilo, configurazione piani)
+
+    U->>F: Richiesta con JWT
+    F->>UA: Verifica JWT
+    UA-->>F: JWT valido
+    F->>G: Upload/Download file con Client ID & Secret
+    G-->>F: Risultato operazione (file URL, conferma)
+    F-->>U: Risposta file (es. link o dati scaricati)
+```
+
+### 7.2 Flusso autenticazione e utilizzo API (admin)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant A as Admin Team
+    participant P as Payments API
+    participant D as Database API
+    participant F as File Storage API
+    participant U as User Auth API
+    participant S as Stripe
+    participant M as MongoDB / SQL
+    participant G as GCS / AWS
+    participant C as Cognito / Keycloak
+
+    A->>P: Chiamate con API Key
+    P->>S: Autenticazione con Client ID & Secret
+    S-->>P: Esito
+    P-->>A: Risposta
+
+    A->>D: Chiamate con API Key
+    D->>M: Autenticazione con Client ID & Secret
+    M-->>D: Esito
+    D-->>A: Risposta
+
+    A->>F: Chiamate con API Key
+    F->>G: Autenticazione con Client ID & Secret
+    G-->>F: Esito
+    F-->>A: Risposta
+
+    A->>U: Chiamate con API Key
+    U->>C: Autenticazione con Client ID & Secret
+    C-->>U: Esito
+    U-->>A: Risposta
+```
